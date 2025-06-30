@@ -161,6 +161,7 @@ cython_debug/
 
 #checkpoint data
 ToxiCN_ex/ToxiCN/saved_dict/*
+
 .DS_Store
 
 # 预训练模型
