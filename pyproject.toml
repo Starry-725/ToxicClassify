@@ -1,0 +1,23 @@
+[project]
+name = "toxiccn"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "datasets>=3.6.0",
+    "flask>=3.1.0",
+    "gensim>=4.3.3",
+    "jiaba>=0.0.1",
+    "jieba>=0.42.1",
+    "nltk>=3.9.1",
+    "numpy>=1.26.4",
+    "openpyxl>=3.1.5",
+    "ray>=2.44.1",
+    "scikit-learn>=1.6.1",
+    "sentence-transformers>=4.1.0",
+    "tensorboardx>=2.6.2.2",
+    "torch>=2.7.0",
+    "tqdm>=4.67.1",
+    "transformers>=4.51.3",
+]
