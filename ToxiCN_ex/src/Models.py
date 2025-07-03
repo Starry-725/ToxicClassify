@@ -61,6 +61,7 @@ class TwoLayerFFNNLayer(torch.nn.Module):
         self.dropout = nn.Dropout(config.dropout)
         self.model = nn.Sequential(nn.Linear(self.input_dim, self.hidden_dim),
                                    nn.Tanh(),
+                                   nn.Dropout(p=0.5),
                                    nn.Linear(self.hidden_dim, self.out_dim))
 
     def forward(self, att_input, pooled_emb):

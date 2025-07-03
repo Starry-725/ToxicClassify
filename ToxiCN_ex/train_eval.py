@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 import time
 import json
-from src.datasets import get_time_dif, to_tensor, convert_onehot,get_all_toxic_id
+from src.datasets import to_tensor, convert_onehot,get_all_toxic_id
 from src.Models import *
 # from src.losses import *
 
@@ -23,12 +23,13 @@ def train(config, train_iter, dev_iter, test_iter, task=1):
     embed_model = Bert_Layer(config).to(config.device)
     # embed_model = BiLSTM(config, embedding_weight).to(config.device)
     model = TwoLayerFFNNLayer(config).to(config.device)
-    model_name = '{}-NN_ML-{}_D-{}_B-{}_E-{}_Lr-{}_aplha-{}'.format(config.model_name, config.pad_size, config.dropout, 
+    model_name = '{}_D-{}_B-{}_E-{}_Lr-{}_aplha-{}'.format(config.model_name, config.dropout, 
                                             config.batch_size, config.num_epochs, config.learning_rate, config.alpha1)
     embed_optimizer = optim.AdamW(embed_model.parameters(), lr=config.learning_rate)
     model_optimizer = optim.AdamW(model.parameters(), lr=config.learning_rate)
     # fgm = FGM(embed_model, epsilon=1, emb_name='word_embeddings.')
-    loss_fn = nn.BCEWithLogitsLoss()
+    # loss_fn = nn.BCEWithLogitsLoss()
+    loss_fn = nn.CrossEntropyLoss()
     # loss_fn = get_loss_func("FL", [0.4, 0.6], config.num_classes, config.alpha1)
     max_score = 0
 
@@ -55,8 +56,8 @@ def train(config, train_iter, dev_iter, test_iter, task=1):
             # label = args['expression']
             # label = args['target']
             loss = loss_fn(logit, label.float())
-            pred = get_preds(config, logit)  
-            # pred = get_preds_task2_4(config, logit)  
+            # pred = get_preds(config, logit)  
+            pred = get_preds_task2_4(config, logit)  
             # pred = get_preds_task3(config, logit)  
             preds.extend(pred)
             labels.extend(label.detach().numpy())
@@ -121,8 +122,8 @@ def eval(config, embed_model, model, loss_fn, dev_iter, data_name='DEV'):
             # label = args['expression']
             # label = args['target']
             loss = loss_fn(logit, label.float())
-            pred = get_preds(config, logit)  
-            # pred = get_preds_task2_4(config, logit)  
+            # pred = get_preds(config, logit)  
+            pred = get_preds_task2_4(config, logit)  
             # pred = get_preds_task3(config, logit)  
             preds.extend(pred)
             labels.extend(label.detach().numpy())
@@ -167,7 +168,8 @@ def predict(config, ori_text, tokenizer, embed_model, model, all_dirty_words):
             # print("att_input, pooled_emb",att_input, pooled_emb)
             logit = model(att_input, pooled_emb)
             # print("logit:",logit)
-            pred = get_preds(config, logit)  
+            # pred = get_preds(config, logit)  
+            pred = get_preds_task2_4(config, logit)  
             preds.extend(pred)
 
     return toxic_ids, logit, preds

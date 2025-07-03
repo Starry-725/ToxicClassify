@@ -103,8 +103,7 @@ if __name__ == '__main__':
         if args.tune_param:
             scheduler = ASHAScheduler(metric='metric', mode="max") if args.tune_asha else None        
             analysis = tune.run(experiment, num_samples=args.tune_samples, config=search_space, resources_per_trial={'gpu':int(args.tune_gpu)},
-                scheduler=scheduler,
-                verbose=3)
+                scheduler=scheduler, verbose=3)
             analysis.results_df.to_csv('tune_results_'+args.tune_file+'.csv')
         # if not tune parameters
         else:
@@ -114,7 +113,7 @@ if __name__ == '__main__':
         embed_model = Bert_Layer(config).to(config.device)
         model = TwoLayerFFNNLayer(config).to(config.device)
         # model_name = "ckp-bert-base-chinese-NN_ML-100_D-0.2_B-64_E-5_Lr-1e-05-BEST.tar"
-        model_name = "ckp-chinese-roberta-wwm-ext-NN_ML-80_D-0.5_B-32_E-20_Lr-1e-05_aplha-0.5-BEST.tar"
+        model_name = "ckp-chinese-roberta-wwm-ext_D-0.5_B-32_E-20_Lr-1e-05_aplha-0.5-BEST.tar"
         path = '{}/{}'.format(config.checkpoint_path, model_name)
         checkpoint = torch.load(path)
         embed_model.load_state_dict(checkpoint['embed_model_state_dict'])
