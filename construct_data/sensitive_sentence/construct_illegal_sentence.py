@@ -3,6 +3,7 @@ import re
 import pandas as pd
 import os
 import random
+import numpy as np
 
 
 def write_json_keys_to_txt(json_file_path, txt_file_path):
@@ -73,6 +74,20 @@ def json_trans_mydata(intentionclass_json,mytrain_json):
          
     return
 
+
+def shuffle_lines_in_file(file_path):
+    # 打开文件并读取内容
+    with open(file_path, 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+
+    # 随机打乱行的顺序
+    random.shuffle(lines)
+
+    # 将打乱后的内容写回源文件
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.writelines(lines)
+
+
 def excel_trans_mydata(excel_data1,excel_data2,json_data):
     # 读取Excel文件
     df1 = pd.read_excel(excel_data1)
@@ -140,18 +155,22 @@ def csv_to_json(csv_file, json_file):
     for _, row in df.iterrows():
         per_dict = {}
         per_dict["content"] = row["text"]
-        if row["label"] == 0:
-            per_dict["toxic_one_hot"] = [1, 0]
-            per_dict["toxic_type_one_hot"] = [0,0]
-            per_dict["expression_one_hot"] = [1, 0, 0]
-            per_dict["target"] = [0,0,0,0,0]
-        elif row["label"] == 1:
-            per_dict["toxic_one_hot"] = [0,1]
-            per_dict["toxic_type_one_hot"] = [0,1]
-            per_dict["expression_one_hot"] = [0, 1, 0]
-            per_dict["target"] = [0,1,0,0,0]
-        else:
-            continue
+        one_hot = [0] * 12
+        one_hot[row['label']] = 1
+        per_dict["toxic_type_one_hot"] = one_hot
+        # print(per_dict)
+        # if row["label"] == 0:
+        #     per_dict["toxic_one_hot"] = [1, 0]
+        #     per_dict["toxic_type_one_hot"] = [0,0]
+        #     per_dict["expression_one_hot"] = [1, 0, 0]
+        #     per_dict["target"] = [0,0,0,0,0]
+        # elif row["label"] == 1:
+        #     per_dict["toxic_one_hot"] = [0,1]
+        #     per_dict["toxic_type_one_hot"] = [0,1]
+        #     per_dict["expression_one_hot"] = [0, 1, 0]
+        #     per_dict["target"] = [0,1,0,0,0]
+        # else:
+        #     continue
         result_list.append(per_dict)
     # 将数据保存为JSON文件
     with open(json_file, "w", encoding="utf-8") as f:
@@ -290,15 +309,15 @@ if __name__ == "__main__":
     
     # 将敏感句子打上标签并转化为csv
     # append_label_trans_csv("generate_sentences_legal2.txt","generate_sentences_legal2.csv",0)
-    append_label_trans_csv("./用户问题十类别判定/10超出服务边界.txt","./用户问题十类别判定/10超出服务边界.csv","超出服务边界")
+    # append_label_trans_csv("C03_sentence.txt","C03_sentence.csv","11")
     # 手动将有毒和无毒句子放在一起，将csv按行打乱
-    # shuffle_lines_in_file('my_toxicity_data.csv')
+    shuffle_lines_in_file('my_dataset_v4.csv')
     
     # 将敏感句子csv转化为训练json数据
-    # csv_to_json('my_toxicity_data.csv', 'my_toxicity_data.json')
+    csv_to_json('my_dataset_v4.csv', 'my_dataset_v4.json')
     
     # 将敏感句子json按照比例分割为训练集和测试集
-    # split_json_file_randomly(input_file_path="my_toxicity_data.json",output_file_path1="my_train_v3.json",output_file_path2="my_test_v3.json")
+    split_json_file_randomly(input_file_path="my_dataset_v4.json",output_file_path1="my_train_v4.json",output_file_path2="my_test_v4.json")
     
     
     

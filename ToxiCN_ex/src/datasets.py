@@ -41,7 +41,9 @@ def get_dirty_words(path):
 
 def get_all_dirty_words(base_path):
     all_dirty_words = []
-    paths = ["general.json", "LGBT.json", "region.json", "sexism.json", "racism.json"]
+    paths = ["A01.json", "A02.json", "A03.json", "A04.json", "A05.json",
+             "B01.json","B02.json","B03.json",
+             "C01.json","C02.json","C03.json"]
     for i in paths:
         all_dirty_words.append(get_dirty_words(base_path + i))
     return all_dirty_words
@@ -143,13 +145,13 @@ class Datasets(Dataset):
 
     def __getitem__(self, idx, corpus=None):
         row = self.data_file[idx]
-        if "toxic_one_hot" in row.keys():
+        if "toxic_type_one_hot" in row.keys():
             sample = {
                     # For BERT
-                    'text_idx': row['text_idx'], 'text_ids': row['text_ids'], 'text_mask': row['text_mask'], 'toxic_ids': row['toxic_ids'],
+                    'text_idx': row['text_idx'], 'text_ids': row['text_ids'], 'text_mask': row['text_mask'], 'toxic_ids': row['toxic_ids'],'toxic_type': row['toxic_type_one_hot']
                     # For GloVe
                     # 'text_token_ids': row["text_token_ids"]
-                    'toxic': row["toxic_one_hot"], 'toxic_type': row["toxic_type_one_hot"], 'expression': row["expression_one_hot"], 'target': row["target"]
+                    # 'toxic': row["toxic_one_hot"], 'toxic_type': row["toxic_type_one_hot"], 'expression': row["expression_one_hot"], 'target': row["target"]
                 }
         else:
             sample = {
@@ -223,6 +225,7 @@ def to_tensor(batch):
     # args["label"] = torch.tensor([b['label'] for b in batch])
     # print(batch[0])
     # For BERT  
+    # print(batch)
     args['text_idx'] = torch.tensor([b['text_idx'] for b in batch])
     args['text_ids'] = torch.tensor([b['text_ids'] for b in batch])
     args['text_mask'] = torch.tensor([b['text_mask'] for b in batch])
@@ -231,12 +234,11 @@ def to_tensor(batch):
     # For GloVe
     # args['text_token_len'] = torch.tensor([b['text_token_len'] for b in batch])
     # args['text_token_ids'] = torch.tensor([b['text_token_ids'] for b in batch])
-    if "toxic" in batch[0].keys():
-        # print([b for b in batch if "toxic" not in b.keys() ])
-        args['toxic'] = torch.tensor([b['toxic'] for b in batch])
+    if 'toxic_type' in batch[0].keys():
+    # args['toxic'] = torch.tensor([b['toxic'] for b in batch])
         args['toxic_type'] = torch.tensor([b['toxic_type'] for b in batch])
-        args['expression'] = torch.tensor([b['expression'] for b in batch])
-        args['target'] = torch.tensor([b['target'] for b in batch])
+    # args['expression'] = torch.tensor([b['expression'] for b in batch])
+    # args['target'] = torch.tensor([b['target'] for b in batch])
 
     return args
 

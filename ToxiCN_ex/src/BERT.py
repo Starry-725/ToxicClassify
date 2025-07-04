@@ -72,7 +72,7 @@ class BertEmbeddings(nn.Module):
         self.token_type_embeddings = nn.Embedding(config.type_vocab_size, config.hidden_size)
         
         # 2022.10.8 toxic_embeddings: non-toxic + 11 kinds of toxic
-        self.toxic_embeddings = nn.Embedding(config.num_classes, config.hidden_size)
+        self.toxic_embeddings = nn.Embedding(12, config.hidden_size)
 
         # self.LayerNorm is not snake-cased to stick with TensorFlow model variable name and be able to load
         # any TensorFlow checkpoint file
@@ -100,7 +100,6 @@ class BertEmbeddings(nn.Module):
         token_type_embeddings = self.token_type_embeddings(token_type_ids)
 
         embeddings = inputs_embeds + position_embeddings + token_type_embeddings
-        print(embeddings)
         # 2022.10.8 toxic_embeddings
         if toxic_ids is not None:
             toxic_embeddings = self.toxic_embeddings(toxic_ids)

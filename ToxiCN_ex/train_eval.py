@@ -45,14 +45,15 @@ def train(config, train_iter, dev_iter, test_iter, task=1):
         for batch in tqdm(train_iter, desc='Training', colour = 'MAGENTA'):
             embed_model.zero_grad()
             model.zero_grad()
+            # print(batch)
             args = to_tensor(batch)
             
             att_input, pooled_emb = embed_model(**args)
 
             logit = model(att_input, pooled_emb).cpu()
 
-            label = args['toxic']
-            # label = args['toxic_type']
+            # label = args['toxic']
+            label = args['toxic_type']
             # label = args['expression']
             # label = args['target']
             loss = loss_fn(logit, label.float())
@@ -117,8 +118,8 @@ def eval(config, embed_model, model, loss_fn, dev_iter, data_name='DEV'):
             logit = model(att_input, pooled_emb)
 
             logit = logit.cpu()
-            label = args['toxic']
-            # label = args['toxic_type']
+            # label = args['toxic']
+            label = args['toxic_type']
             # label = args['expression']
             # label = args['target']
             loss = loss_fn(logit, label.float())
