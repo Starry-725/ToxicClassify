@@ -159,8 +159,8 @@ def predict(config, ori_text, tokenizer, embed_model, model, all_dirty_words):
     toxic_ids = get_all_toxic_id(80, encoded['input_ids'], all_dirty_words)
     test_data = [[{'text_idx':encoded['input_ids'],'text_ids':encoded['token_type_ids'],'text_mask':encoded['attention_mask'],'toxic_ids':toxic_ids}]]
     # test_iter = Dataloader(test_iter,  batch_size=int(config.batch_size), shuffle=False)
-    # embed_model.eval()
-    # model.eval()
+    embed_model.eval()
+    model.eval()
     preds = []
     for batch in test_data:
         with torch.no_grad():
@@ -169,11 +169,13 @@ def predict(config, ori_text, tokenizer, embed_model, model, all_dirty_words):
             # print("att_input, pooled_emb",att_input, pooled_emb)
             logit = model(att_input, pooled_emb)
             # print("logit:",logit)
-            # pred = get_preds(config, logit)  
+            # pred = get_preds(config, logit)
+            # 应用 softmax 得到概率
+            probs = F.softmax(logit, dim=1) 
             pred = get_preds_task2_4(config, logit)  
             preds.extend(pred)
 
-    return toxic_ids, logit, preds
+    return toxic_ids, probs, preds
 
 
 

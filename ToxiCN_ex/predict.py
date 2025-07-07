@@ -16,7 +16,7 @@ config = x.Config_base("chinese-roberta-wwm-ext", "ToxiCN")  # 引入Config参�
 embed_model = Bert_Layer(config).to(config.device)
 model = TwoLayerFFNNLayer(config).to(config.device)
 # model_name = "ckp-bert-base-chinese-NN_ML-100_D-0.2_B-64_E-5_Lr-1e-05-BEST.tar"
-model_name = "ckp-chinese-roberta-wwm-ext-NN_ML-80_D-0.5_B-32_E-30_Lr-1e-05_aplha-0.5-BEST.tar"
+model_name = "ckp-chinese-roberta-wwm-ext_D-0.5_B-32_E-30_Lr-1e-05_aplha-0.5-BEST.tar"
 model_path = '{}/{}'.format(config.checkpoint_path, model_name)
 checkpoint = torch.load(model_path)
 embed_model.load_state_dict(checkpoint['embed_model_state_dict'])
@@ -51,12 +51,12 @@ all_dirty_words = get_all_dirty_words(lexicon_path)
 # ]
 
 # 读取Excel文件
-df = pd.read_excel('/media/dahan/data/wl/toxicCN/ToxiCN_ex/非拒答题目.xlsx')
+df = pd.read_excel('/media/dahan/data/wl/toxicCN/ToxiCN_ex/应拒答题目.xlsx')
 
 # 将指定列转换为list
 test_sentences = df['question'].tolist()
 test_toxic_ids = []
-test_logits = []
+test_probs = []
 test_results = []
 
 # 预测每个句子
@@ -68,14 +68,17 @@ for sentence in test_sentences:
     # print(result)
     try:
         # 执行预测
-        toxic_ids, logit, result = predict(config, sentence, tokenizer, embed_model, model, all_dirty_words)
-        test_logits.append(logit.cpu().numpy())
+        toxic_ids, probs, result = predict(config, sentence, tokenizer, embed_model, model, all_dirty_words)
+        test_probs.append(probs.cpu().numpy())
+        np.set_printoptions(precision=8, suppress=True)
         test_toxic_ids.append(toxic_ids)
         # 输出结果
-        if result == [[1, 0]]:
-            test_results.append("无恶意。")
-        elif result == [[0, 1]]:
-            test_results.append("有恶意！！！拦截")
+        
+        label_list = ["Z00无恶意","A01:政治敏感类","A02:落马官员","A03:暴力与恐怖主义类","A04:色情与低俗类","A05:违法犯罪类",
+                      "B01:偏见歧视与仇恨类","B02:商业敏感与知识产权类","B03:个人隐私类","C01:不文明用语","C02:虚假信息与误导类","C03:恶意指令注入"]
+        result_label = label_list[result[0].index(1)]
+        test_results.append(result_label)
+
         # print(result)
         
     except Exception as e:
@@ -87,10 +90,10 @@ for sentence in test_sentences:
 result_df = pd.DataFrame({
     'question': test_sentences,
     'toxic_ids':test_toxic_ids,
-    'logit':test_logits,
+    'probabilities':test_probs,
     'result': test_results
 })
 
 # 将结果保存到Excel文件
-result_df.to_excel('非拒答题目_results.xlsx', index=False)
-print("预测结果已保存到 非拒答题目_results.xlsx")
+result_df.to_excel('应拒答题目_results.xlsx', index=False)
+print("预测结果已保存到 应拒答题目_results.xlsx")
