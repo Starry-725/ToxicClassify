@@ -43,7 +43,8 @@ def get_all_dirty_words(base_path):
     all_dirty_words = []
     paths = ["A01.json", "A02.json", "A03.json", "A04.json", "A05.json",
              "B01.json","B02.json","B03.json",
-             "C01.json","C02.json","C03.json"]
+             "C01.json","C02.json",
+             "D01.json"]
     for i in paths:
         all_dirty_words.append(get_dirty_words(base_path + i))
     return all_dirty_words

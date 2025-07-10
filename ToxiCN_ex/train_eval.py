@@ -4,7 +4,6 @@ from sklearn.metrics import f1_score, precision_score, recall_score, accuracy_sc
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 from tqdm import tqdm
 
@@ -28,8 +27,12 @@ def train(config, train_iter, dev_iter, test_iter, task=1):
     embed_optimizer = optim.AdamW(embed_model.parameters(), lr=config.learning_rate)
     model_optimizer = optim.AdamW(model.parameters(), lr=config.learning_rate)
     # fgm = FGM(embed_model, epsilon=1, emb_name='word_embeddings.')
-    # loss_fn = nn.BCEWithLogitsLoss()
-    loss_fn = nn.CrossEntropyLoss()
+    
+    # 如果某些标签非常罕见（正样本很少），模型可能会倾向于全部预测为负样本。
+    # 你可以通过 pos_weight 参数给正样本更高的权重，从而加大对稀有标签的惩罚。
+    weights = torch.tensor([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]) 
+    loss_fn = nn.BCEWithLogitsLoss(pos_weight=weights)
+    # loss_fn = nn.CrossEntropyLoss()
     # loss_fn = get_loss_func("FL", [0.4, 0.6], config.num_classes, config.alpha1)
     max_score = 0
 
@@ -58,8 +61,8 @@ def train(config, train_iter, dev_iter, test_iter, task=1):
             # label = args['target']
             loss = loss_fn(logit, label.float())
             # pred = get_preds(config, logit)  
-            pred = get_preds_task2_4(config, logit)  
-            # pred = get_preds_task3(config, logit)  
+            # pred = get_preds_task2_4(config, logit)  
+            pred = get_preds_task3(config, logit)  
             preds.extend(pred)
             labels.extend(label.detach().numpy())
 
@@ -124,8 +127,8 @@ def eval(config, embed_model, model, loss_fn, dev_iter, data_name='DEV'):
             # label = args['target']
             loss = loss_fn(logit, label.float())
             # pred = get_preds(config, logit)  
-            pred = get_preds_task2_4(config, logit)  
-            # pred = get_preds_task3(config, logit)  
+            # pred = get_preds_task2_4(config, logit)  
+            pred = get_preds_task3(config, logit)  
             preds.extend(pred)
             labels.extend(label.detach().numpy())
             loss_all += loss.item()
@@ -170,9 +173,10 @@ def predict(config, ori_text, tokenizer, embed_model, model, all_dirty_words):
             logit = model(att_input, pooled_emb)
             # print("logit:",logit)
             # pred = get_preds(config, logit)
-            # 应用 softmax 得到概率
-            probs = F.softmax(logit, dim=1) 
-            pred = get_preds_task2_4(config, logit)  
+            # 应用 sigmoid 得到概率
+            probs = torch.sigmoid(logit)
+            # pred = get_preds_task2_4(config, logit)
+            pred = get_preds_task3(config,logit) 
             preds.extend(pred)
 
     return toxic_ids, probs, preds
@@ -193,10 +197,10 @@ def get_preds(config, logit):
 def get_preds_task2_4(config, logit):
     all_results = []
     logit_ = torch.sigmoid(logit)
-    results_pred = torch.max(logit_.data, 1)[0].cpu().numpy()
-    results = torch.max(logit_.data, 1)[1].cpu().numpy() # index for maximum probability
+    results_pred = torch.max(logit_.data, 1)[0].cpu().numpy() # 获得的是sigmoid的值，这些是置信度
+    results = torch.max(logit_.data, 1)[1].cpu().numpy() # index for maximum probability，[1]获得的是最高值的下标
     for i in range(len(results)):
-        if results_pred[i] < 0.5:
+        if results_pred[i] < config.confi_thres:
             result = [0 for i in range(config.num_classes)]
         else:
             result = convert_onehot(config, results[i])
@@ -211,17 +215,17 @@ def get_preds_task3(config, logit):
     results = torch.max(logit_.data, 1)[1].cpu().numpy()
     logit_ = logit_.detach().cpu().numpy()
     for i in range(len(results)):
-        if results_pred[i] < 0.5:
+        if results_pred[i] < config.confi_thres:
             result = [0 for i in range(config.num_classes)]
         else:
             result = get_pred_task3(logit_[i])
         all_results.append(result)
     return all_results
 
-def get_pred_task3(logit):
+def get_pred_task3(config,logit):
     result = [0 for i in range(len(logit))]
     for i in range(len(logit)):
-        if logit[i] >= 0.5:
+        if logit[i] >= config.confi_thres:
             result[i] = 1
     return result
 

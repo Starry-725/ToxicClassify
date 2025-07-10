@@ -37,8 +37,7 @@ class Config_base(object):
         self.seed = 1        
         # self.require_improvement = 1000                                 # 若超过1000batch效果还没提升，则提前结束训练 transformer:2000
         self.num_classes = 12                                             # 类别数
-        # self.num_classes = 5
-        # self.num_classes = 3  
+        self.confi_thres = 0.5                                            # 置信度临界值，大于这个概率则判定为该类别
         
         # self.n_vocab = 0                                                # 词表大小，在运行时赋值
         self.pad_size = 80                                              # 每句话处理成的长度(短填长切)
@@ -49,7 +48,7 @@ class Config_base(object):
         self.fc_hidden_dim = 256
 
         # train
-        self.device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')   # 设备
+        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')   # 设备
         self.learning_rate = 1e-5                                       # 学习率  transformer:5e-4 
         self.scheduler = True                                          # 是否学习率衰减
         self.adversarial = False  # 是否对抗训练
