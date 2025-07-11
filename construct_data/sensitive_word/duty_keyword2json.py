@@ -39,7 +39,7 @@ def append_label_trans_csv(txt_path, csv_path, label_num):
 def duty_words_trans_json(dutywords_txt,dutywords_json):
     # 加载tokenizer，必须与模型匹配
     # 选择一个选项加载
-    tokenizer = AutoTokenizer.from_pretrained("/media/dahan/data/wl/toxicCN/chinese-roberta-wwm-ext")
+    tokenizer = AutoTokenizer.from_pretrained("/root/autodl-tmp/ToxicClassify/chinese-roberta-wwm-ext")
 
 
     # 读取txt文件中的词汇列表
@@ -86,7 +86,18 @@ def write_json_keys_to_txt(json_file_path, txt_file_path):
 
 if __name__ == "__main__":
     # 敏感词典编码并转化为json
+    duty_words_trans_json(dutywords_txt="A01.txt",dutywords_json="A01.json")
+    duty_words_trans_json(dutywords_txt="A02.txt",dutywords_json="A02.json")
+    duty_words_trans_json(dutywords_txt="A03.txt",dutywords_json="A03.json")
+    duty_words_trans_json(dutywords_txt="A04.txt",dutywords_json="A04.json")
+    duty_words_trans_json(dutywords_txt="A05.txt",dutywords_json="A05.json")
     duty_words_trans_json(dutywords_txt="B01.txt",dutywords_json="B01.json")
+    duty_words_trans_json(dutywords_txt="B02.txt",dutywords_json="B02.json")
+    duty_words_trans_json(dutywords_txt="B03.txt",dutywords_json="B03.json")
+    duty_words_trans_json(dutywords_txt="C01.txt",dutywords_json="C01.json")
+    duty_words_trans_json(dutywords_txt="C02.txt",dutywords_json="C02.json")
+    duty_words_trans_json(dutywords_txt="D01.txt",dutywords_json="D01.json")
+    
     
     # 将敏感词json文件转为txt
     # write_json_keys_to_txt("region.json","dutywords.txt")

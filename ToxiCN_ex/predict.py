@@ -12,7 +12,7 @@ torch.cuda.manual_seed_all(1)
 torch.backends.cudnn.deterministic = True  # 保证每次结果一样
 
 x = import_module('model.' + "Config_base")
-config = x.Config_base("chinese-roberta-wwm-ext", "ToxiCN")  # 引入Config参数，包括Config_base和各私有Config
+config = x.Config_base("chinese-roberta-wwm-ext", "ToxicClassify")  # 引入Config参数，包括Config_base和各私有Config
 embed_model = Bert_Layer(config).to(config.device)
 model = TwoLayerFFNNLayer(config).to(config.device)
 # model_name = "ckp-bert-base-chinese-NN_ML-100_D-0.2_B-64_E-5_Lr-1e-05-BEST.tar"

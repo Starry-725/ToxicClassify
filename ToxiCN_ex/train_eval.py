@@ -30,7 +30,7 @@ def train(config, train_iter, dev_iter, test_iter, task=1):
     
     # 如果某些标签非常罕见（正样本很少），模型可能会倾向于全部预测为负样本。
     # 你可以通过 pos_weight 参数给正样本更高的权重，从而加大对稀有标签的惩罚。
-    weights = torch.tensor([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]) 
+    weights = torch.tensor([1.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0]) 
     loss_fn = nn.BCEWithLogitsLoss(pos_weight=weights)
     # loss_fn = nn.CrossEntropyLoss()
     # loss_fn = get_loss_func("FL", [0.4, 0.6], config.num_classes, config.alpha1)
@@ -218,7 +218,7 @@ def get_preds_task3(config, logit):
         if results_pred[i] < config.confi_thres:
             result = [0 for i in range(config.num_classes)]
         else:
-            result = get_pred_task3(logit_[i])
+            result = get_pred_task3(config,logit_[i])
         all_results.append(result)
     return all_results
 

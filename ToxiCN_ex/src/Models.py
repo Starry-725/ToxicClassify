@@ -33,6 +33,7 @@ class Bert_Layer(torch.nn.Module):
         # self.use_cuda = kwargs['use_cuda']
         self.device = config.device
         # BERT/Roberta
+        # print("config.model_name",config.model_name)
         self.bert_layer = BertModel.from_pretrained(config.model_name)
         # ChineseBERT
         # self.config = ChineseBertConfig.from_pretrained(config.model_name)
